@@ -17,9 +17,10 @@ logLik_mnl <- function(Beta,
   # ensure matrix for X
   Xmat <- as.matrix(Data[, X, drop = FALSE])
 
-  V    <- Xmat %*% as.vector(Beta[seq_along(X)])   # utilities
-  num  <- exp(V)                                   # numerator
-  den  <- tapply(num, GroupID, sum)                # denominator by choice set
+  V <- Xmat %*% as.vector(Beta[seq_along(X)])   # utilities
+  V <- V - ave(V, GroupID, FUN = max)           # stabilization: avoids overflow in exp(V)
+  num <- exp(V)                                 # stabilized exponentials
+  den <- tapply(num, GroupID, sum)              # denominator
 
   # probabilities for chosen alternatives
   chosen <- Data[[choiceVar]] == 1
